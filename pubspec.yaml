@@ -1,0 +1,19 @@
+name: time_picker_with_second
+description: A Custom Time Picker with Second Unit of Time
+version: 0.0.1
+homepage: https://github.com/renseki/time_picker_with_second
+
+environment:
+  sdk: '>=2.18.0 <3.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
