@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -234,7 +235,7 @@ class _TimePickerHeader extends StatelessWidget {
             helpText ??
                 MaterialLocalizations.of(context).timePickerDialHelpText,
             style: TimePickerTheme.of(context).helpTextStyle ??
-                themeData.textTheme.overline,
+                themeData.textTheme.labelSmall,
           ),
           controls,
         ],
@@ -272,7 +273,7 @@ class _HourMinuteControl extends StatelessWidget {
               : themeData.colorScheme.onSurface.withOpacity(0.12);
         });
     final TextStyle style =
-        timePickerTheme.hourMinuteTextStyle ?? themeData.textTheme.headline3!;
+        timePickerTheme.hourMinuteTextStyle ?? themeData.textTheme.displaySmall!;
     final ShapeBorder shape = timePickerTheme.hourMinuteShape ?? _kDefaultShape;
 
     final Set<MaterialState> states = isSelected
@@ -411,7 +412,7 @@ class _StringFragment extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final TextStyle hourMinuteStyle =
-        timePickerTheme.hourMinuteTextStyle ?? theme.textTheme.headline3!;
+        timePickerTheme.hourMinuteTextStyle ?? theme.textTheme.displaySmall!;
     final Color textColor =
         timePickerTheme.hourMinuteTextColor ?? theme.colorScheme.onSurface;
 
@@ -638,7 +639,7 @@ class _DayPeriodControl extends StatelessWidget {
         ? <MaterialState>{MaterialState.selected}
         : <MaterialState>{};
     final TextStyle textStyle = timePickerTheme.dayPeriodTextStyle ??
-        Theme.of(context).textTheme.subtitle1!;
+        Theme.of(context).textTheme.titleMedium!;
     final TextStyle amStyle = textStyle.copyWith(
       color: MaterialStateProperty.resolveAs(textColor, amStates),
     );
@@ -660,8 +661,8 @@ class _DayPeriodControl extends StatelessWidget {
     final double buttonTextScaleFactor =
         math.min(MediaQuery.of(context).textScaleFactor, 2.0);
 
-    final hours = List.generate(12,
-        (index) => TimeOfDayWithSecond(hour: index, minute: 0, second: 0));
+    final hours = List.generate(
+        12, (index) => TimeOfDayWithSecond(hour: index, minute: 0, second: 0));
     final bool hasAMHours = hours.where((h) => _isSelectableTime(h)).isNotEmpty;
     final bool hasPMHours = hours
         .where((h) => _isSelectableTime(h.replacing(hour: h.hour + 12)))
@@ -1074,8 +1075,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   @override
   void didUpdateWidget(_Dial oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (
-    widget.mode != oldWidget.mode ||
+    if (widget.mode != oldWidget.mode ||
         widget.selectedTime != oldWidget.selectedTime) {
       if (!_dragging) _animateTo(_getThetaForTime(widget.selectedTime));
     }
@@ -1162,7 +1162,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final TimeOfDayWithSecond current =
         _getTimeForTheta(_theta.value, roundMinutes: roundMinutes);
     // if (current != widget.selectedTime){
-      widget.onChanged(current);
+    widget.onChanged(current);
     // }
     return current;
   }
@@ -1371,7 +1371,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     required String label,
     VoidCallback? onTap,
   }) {
-    final TextStyle style = textTheme.bodyText1!.copyWith(color: color);
+    final TextStyle style = textTheme.bodyLarge!.copyWith(color: color);
     final double labelScaleFactor =
         math.min(MediaQuery.of(context).textScaleFactor, 2.0);
     return _TappableLabel(
@@ -1432,8 +1432,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   List<_TappableLabel> _buildMinutes(TextTheme textTheme, Color color) {
-    const List<TimeOfDayWithSecond> minuteMarkerValues =
-        <TimeOfDayWithSecond>[
+    const List<TimeOfDayWithSecond> minuteMarkerValues = <TimeOfDayWithSecond>[
       TimeOfDayWithSecond(hour: 0, minute: 0, second: 0),
       TimeOfDayWithSecond(hour: 0, minute: 5, second: 0),
       TimeOfDayWithSecond(hour: 0, minute: 10, second: 0),
@@ -1466,8 +1465,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   List<_TappableLabel> _buildSeconds(TextTheme textTheme, Color color) {
-    const List<TimeOfDayWithSecond> secondsMarkerValues =
-        <TimeOfDayWithSecond>[
+    const List<TimeOfDayWithSecond> secondsMarkerValues = <TimeOfDayWithSecond>[
       TimeOfDayWithSecond(hour: 0, minute: 0, second: 0),
       TimeOfDayWithSecond(hour: 0, minute: 0, second: 5),
       TimeOfDayWithSecond(hour: 0, minute: 0, second: 10),
@@ -1527,26 +1525,54 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         if (widget.use24HourDials) {
           selectedDialValue = widget.selectedTime.hour;
           primaryLabels = _build24HourRing(theme.textTheme, primaryLabelColor);
-          secondaryLabels =
-              _build24HourRing(theme.accentTextTheme, secondaryLabelColor);
+          secondaryLabels = _build24HourRing(
+            theme
+                .copyWith(
+                  colorScheme: theme.colorScheme
+                      .copyWith(secondary: theme.colorScheme.onSecondary),
+                )
+                .textTheme,
+            secondaryLabelColor,
+          );
         } else {
           selectedDialValue = widget.selectedTime.hourOfPeriod;
           primaryLabels = _build12HourRing(theme.textTheme, primaryLabelColor);
-          secondaryLabels =
-              _build12HourRing(theme.accentTextTheme, secondaryLabelColor);
+          secondaryLabels = _build24HourRing(
+            theme
+                .copyWith(
+                  colorScheme: theme.colorScheme
+                      .copyWith(secondary: theme.colorScheme.onSecondary),
+                )
+                .textTheme,
+            secondaryLabelColor,
+          );
         }
         break;
       case _TimePickerMode.seconds:
         selectedDialValue = widget.selectedTime.second;
         primaryLabels = _buildSeconds(theme.textTheme, primaryLabelColor);
-        secondaryLabels =
-            _buildSeconds(theme.accentTextTheme, secondaryLabelColor);
+        secondaryLabels = _build24HourRing(
+          theme
+              .copyWith(
+                colorScheme: theme.colorScheme
+                    .copyWith(secondary: theme.colorScheme.onSecondary),
+              )
+              .textTheme,
+          secondaryLabelColor,
+        );
         break;
       case _TimePickerMode.minute:
         selectedDialValue = widget.selectedTime.minute;
         primaryLabels = _buildMinutes(theme.textTheme, primaryLabelColor);
-        secondaryLabels =
-            _buildMinutes(theme.accentTextTheme, secondaryLabelColor);
+        secondaryLabels = _build24HourRing(
+          theme
+              .copyWith(
+                colorScheme: theme.colorScheme
+                    .copyWith(secondary: theme.colorScheme.onSecondary),
+              )
+              .textTheme,
+          secondaryLabelColor,
+        );
         break;
     }
 
@@ -1756,7 +1782,6 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
       _mode = _TimePickerMode.seconds;
     });
   }
-
 
   void _handleCancel() {
     Navigator.pop(context);
