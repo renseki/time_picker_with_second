@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:time_picker_with_second/src/num_extension.dart';
 import 'package:time_picker_with_second/src/time_of_day_with_second.dart';
 
 /// Signature for predicating times for enabled time selections.
@@ -122,6 +123,29 @@ class _TimePickerHeader extends StatelessWidget {
     double? width;
     Widget? controls;
 
+    final formatIsNotAmPm =
+        timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm;
+    final formatIsAmPm = timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm;
+
+    final not24HourDialNonMeridian = !use24HourDials && formatIsNotAmPm;
+    final not24HourDialWithMeridian = !use24HourDials && formatIsAmPm;
+
+    final dayPeriodControl = _DayPeriodControl(
+      selectedTime: selectedTime,
+      orientation: orientation,
+      onChanged: onChanged,
+    );
+
+    final hourControl = _HourControl(fragmentContext: fragmentContext);
+    final expandedHourControl = Expanded(child: hourControl);
+
+    final minuteControl = _MinuteControl(fragmentContext: fragmentContext);
+    final secondsControl = _SecondsControl(fragmentContext: fragmentContext);
+    final expandedMinuteControl = Expanded(child: minuteControl);
+    final expandedSecondsControl = Expanded(child: secondsControl);
+
+    final stringFragment = _StringFragment(timeOfDayFormat: timeOfDayFormat);
+
     switch (orientation) {
       case Orientation.portrait:
         // Keep width null because in portrait we don't cap the width.
@@ -133,46 +157,26 @@ class _TimePickerHeader extends StatelessWidget {
               height: kMinInteractiveDimension * 2,
               child: Row(
                 children: <Widget>[
-                  if (!use24HourDials &&
-                      timeOfDayFormat ==
-                          TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
-                    _DayPeriodControl(
-                      selectedTime: selectedTime,
-                      orientation: orientation,
-                      onChanged: onChanged,
-                    ),
-                    const SizedBox(width: 12),
+                  if (not24HourDialWithMeridian) ...[
+                    dayPeriodControl,
+                    12.widthBox,
                   ],
                   Expanded(
                     child: Row(
                       // Hour/minutes should not change positions in RTL locales.
                       textDirection: TextDirection.ltr,
                       children: <Widget>[
-                        Expanded(
-                          child: _HourControl(fragmentContext: fragmentContext),
-                        ),
-                        _StringFragment(timeOfDayFormat: timeOfDayFormat),
-                        Expanded(
-                          child:
-                              _MinuteControl(fragmentContext: fragmentContext),
-                        ),
-                        _StringFragment(timeOfDayFormat: timeOfDayFormat),
-                        Expanded(
-                          child:
-                              _SecondsControl(fragmentContext: fragmentContext),
-                        ),
+                        expandedHourControl,
+                        stringFragment,
+                        expandedMinuteControl,
+                        stringFragment,
+                        expandedSecondsControl,
                       ],
                     ),
                   ),
-                  if (!use24HourDials &&
-                      timeOfDayFormat !=
-                          TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
-                    const SizedBox(width: 12),
-                    _DayPeriodControl(
-                      selectedTime: selectedTime,
-                      orientation: orientation,
-                      onChanged: onChanged,
-                    ),
+                  if (not24HourDialNonMeridian) ...<Widget>[
+                    12.widthBox,
+                    dayPeriodControl,
                   ],
                 ],
               ),
@@ -187,40 +191,22 @@ class _TimePickerHeader extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              if (!use24HourDials &&
-                  timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm)
-                _DayPeriodControl(
-                  selectedTime: selectedTime,
-                  orientation: orientation,
-                  onChanged: onChanged,
-                ),
+              if (not24HourDialWithMeridian) dayPeriodControl,
               SizedBox(
                 height: kMinInteractiveDimension * 2,
                 child: Row(
                   // Hour/minutes should not change positions in RTL locales.
                   textDirection: TextDirection.ltr,
                   children: <Widget>[
-                    Expanded(
-                      child: _HourControl(fragmentContext: fragmentContext),
-                    ),
-                    _StringFragment(timeOfDayFormat: timeOfDayFormat),
-                    Expanded(
-                      child: _MinuteControl(fragmentContext: fragmentContext),
-                    ),
-                    _StringFragment(timeOfDayFormat: timeOfDayFormat),
-                    Expanded(
-                      child: _SecondsControl(fragmentContext: fragmentContext),
-                    ),
+                    expandedHourControl,
+                    stringFragment,
+                    expandedMinuteControl,
+                    stringFragment,
+                    secondsControl,
                   ],
                 ),
               ),
-              if (!use24HourDials &&
-                  timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm)
-                _DayPeriodControl(
-                  selectedTime: selectedTime,
-                  orientation: orientation,
-                  onChanged: onChanged,
-                ),
+              if (not24HourDialNonMeridian) dayPeriodControl,
             ],
           ),
         );
@@ -230,18 +216,26 @@ class _TimePickerHeader extends StatelessWidget {
     return Container(
       width: width,
       padding: padding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const SizedBox(height: 16),
-          Text(
-            helpText ??
-                MaterialLocalizations.of(context).timePickerDialHelpText,
-            style: TimePickerTheme.of(context).helpTextStyle ??
-                themeData.textTheme.labelSmall,
-          ),
-          controls,
-        ],
+      child: Builder(
+        builder: (context) {
+          final helpTextContent = helpText ??
+              MaterialLocalizations.of(context).timePickerDialHelpText;
+
+          final helpTextStyle = TimePickerTheme.of(context).helpTextStyle ??
+              themeData.textTheme.labelSmall;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              16.heightBox,
+              Text(
+                helpTextContent,
+                style: helpTextStyle,
+              ),
+              controls!,
+            ],
+          );
+        },
       ),
     );
   }
@@ -269,23 +263,30 @@ class _HourMinuteControl extends StatelessWidget {
               ? themeData.colorScheme.primary
               : themeData.colorScheme.onSurface;
         });
+
     final backgroundColor = timePickerTheme.hourMinuteColor ??
         MaterialStateColor.resolveWith((Set<MaterialState> states) {
           return states.contains(MaterialState.selected)
               ? themeData.colorScheme.primary.withOpacity(isDark ? 0.24 : 0.12)
               : themeData.colorScheme.onSurface.withOpacity(0.12);
         });
+
     final style = timePickerTheme.hourMinuteTextStyle ??
         themeData.textTheme.displaySmall!;
+
     final shape = timePickerTheme.hourMinuteShape ?? _kDefaultShape;
 
     final states = isSelected
         ? <MaterialState>{MaterialState.selected}
         : <MaterialState>{};
+
     return SizedBox(
       height: _kTimePickerHeaderControlHeight,
       child: Material(
-        color: MaterialStateProperty.resolveAs(backgroundColor, states),
+        color: MaterialStateProperty.resolveAs(
+          backgroundColor,
+          states,
+        ),
         clipBehavior: Clip.antiAlias,
         shape: shape,
         child: InkWell(
@@ -350,6 +351,7 @@ class _HourControl extends StatelessWidget {
       nextHour,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
     );
+
     final previousHour = hoursFromSelected(-1);
 
     final formattedPreviousHour = localizations.formatHour(
@@ -381,7 +383,7 @@ class _HourControl extends StatelessWidget {
   }
 }
 
-/// A passive fragment showing a string value.
+/// A fragment showing a string value.
 class _StringFragment extends StatelessWidget {
   const _StringFragment({
     required this.timeOfDayFormat,
