@@ -16,7 +16,7 @@ know whether this package might be useful for them.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+This package provide seconds picker which is not provided by flutter by default.
 
 ## Getting started
 
