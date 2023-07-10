@@ -79,4 +79,11 @@ class TimePickerConstants {
   }) {
     onFailValidation?.call(context);
   }
+
+  /// Checking if the time is selectable.
+  static bool isSelectableTime({
+    TimeOfDayWithSecond? time,
+    SelectableTimePredicate? selectableTimePredicate,
+  }) =>
+      selectableTimePredicate?.call(time!) ?? true;
 }

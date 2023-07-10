@@ -3,8 +3,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
 import 'package:time_picker_with_second/src/constants/time_picker_constants.dart';
+import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
 import 'package:time_picker_with_second/src/widgets/dial.dart';
 import 'package:time_picker_with_second/src/widgets/timepicker_header.dart';
 import 'package:time_picker_with_second/time_picker_with_second.dart';
@@ -27,6 +27,7 @@ class TimePickerWithSecondsDialog extends StatefulWidget {
     super.key,
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.selectableTimePredicate,
+    this.onFailValidation,
   }) {
     assert(
       selectableTimePredicate == null || selectableTimePredicate!(initialTime),
@@ -34,6 +35,9 @@ class TimePickerWithSecondsDialog extends StatefulWidget {
       ' provided selectableTimePredicate.',
     );
   }
+
+  /// onFailValidation is called when the user clicks the confirm button and the
+  final dynamic Function(BuildContext)? onFailValidation;
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDayWithSecond initialTime;
@@ -212,8 +216,14 @@ class TimePickerWithSecondsDialogState
   }
 
   void _handleOk() {
-    if (!_isSelectableTime(selectedTime)) {
-      _notifyFailValidation();
+    if (!TimePickerConstants.isSelectableTime(
+      time: selectedTime,
+      selectableTimePredicate: _selectableTimePredicate,
+    )) {
+      TimePickerConstants.notifyFailValidation(
+        context: context,
+        onFailValidation: widget.onFailValidation,
+      );
       return;
     }
 
@@ -417,10 +427,10 @@ class TimePickerWithSecondsDialogState
 //         );
         break;
       case TimePickerEntryMode.dialOnly:
-        // TODO: Handle this case.
+        // TODO(Zagustan): Handle this case.
         break;
       case TimePickerEntryMode.inputOnly:
-        // TODO: Handle this case.
+        // TODO(Zagustan): Handle this case.
         break;
     }
 
@@ -450,6 +460,3 @@ class TimePickerWithSecondsDialogState
     super.dispose();
   }
 }
-
-late bool Function(TimeOfDayWithSecond? time) _isSelectableTime;
-late dynamic Function() _notifyFailValidation;

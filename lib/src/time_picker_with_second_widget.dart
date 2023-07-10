@@ -1,15 +1,7 @@
-// ignore_for_file: comment_references, prefer_asserts_in_initializer_lists
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
-import 'package:time_picker_with_second/src/constants/time_picker_constants.dart';
-import 'package:time_picker_with_second/src/utils/num_extension.dart';
 import 'package:time_picker_with_second/src/time_of_day_with_second.dart';
 import 'package:time_picker_with_second/src/widgets/timepicker_dialog.dart';
-import 'package:time_picker_with_second/src/widgets/timepicker_fragment.dart';
 
 /// Shows a dialog containing a material design time picker.
 ///
@@ -80,6 +72,7 @@ import 'package:time_picker_with_second/src/widgets/timepicker_fragment.dart';
 ///
 ///  * [showDatePicker], which shows a dialog that contains a material design
 ///    date picker.
+
 Future<TimeOfDayWithSecond?> showTimePickerWithSecond({
   required BuildContext context,
   required TimeOfDayWithSecond initialTime,
@@ -103,8 +96,6 @@ Future<TimeOfDayWithSecond?> showTimePickerWithSecond({
     " if 'selectableTimePredicate' has been set",
   );
 
-  _isSelectableTime = (time) => selectableTimePredicate?.call(time) ?? true;
-
   final Widget dialog = TimePickerWithSecondsDialog(
     initialTime: initialTime,
     initialEntryMode: initialEntryMode,
@@ -112,18 +103,15 @@ Future<TimeOfDayWithSecond?> showTimePickerWithSecond({
     confirmText: confirmText,
     helpText: helpText,
     selectableTimePredicate: selectableTimePredicate,
+    onFailValidation: onFailValidation,
   );
 
   return showDialog<TimeOfDayWithSecond>(
     context: context,
     useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {
-      _notifyFailValidation = () => onFailValidation?.call(context);
       return builder == null ? dialog : builder(context, dialog);
     },
     routeSettings: routeSettings,
   );
 }
-
-late bool Function(TimeOfDayWithSecond? time) _isSelectableTime;
-late dynamic Function() _notifyFailValidation;

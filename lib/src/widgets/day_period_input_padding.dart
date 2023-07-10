@@ -11,7 +11,10 @@ class DayPeriodInputPadding extends SingleChildRenderObjectWidget {
     this.orientation,
   });
 
+  /// The minimum size of the padding.
   final Size? minSize;
+
+  /// The orientation of the time picker, used to determine the layout.
   final Orientation? orientation;
 
   @override

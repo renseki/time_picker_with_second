@@ -1,9 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:time_picker_with_second/src/constants/time_picker_constants.dart';
 import 'package:time_picker_with_second/src/widgets/tappable_label.dart';
-
-import '../constants/time_picker_constants.dart';
 
 ///
 class DialPainter extends CustomPainter {

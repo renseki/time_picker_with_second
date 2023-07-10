@@ -13,8 +13,12 @@ class DayPeriodControl extends StatelessWidget {
     required this.selectedTime,
     required this.onChanged,
     required this.orientation,
+    required this.selectableTimePredicate,
     super.key,
   });
+
+  /// The currently selected time's predicate
+  final SelectableTimePredicate? selectableTimePredicate;
 
   /// The currently selected time.
   final TimeOfDayWithSecond? selectedTime;
@@ -139,10 +143,17 @@ class DayPeriodControl extends StatelessWidget {
         second: 0,
       ),
     );
-    final hasAMHours = hours.where((h) => _isSelectableTime(h)).isNotEmpty;
+    final hasAMHours = hours
+        .where(
+          (h) => TimePickerConstants.isSelectableTime(
+            time: h,
+          ),
+        )
+        .isNotEmpty;
 
     final hasPMHours = hours
-        .where((h) => _isSelectableTime(h.replacing(hour: h.hour + 12)))
+        .where((h) => TimePickerConstants.isSelectableTime(
+            time: h.replacing(hour: h.hour + 12)))
         .isNotEmpty;
 
     final Widget amButton = Opacity(
@@ -253,6 +264,3 @@ class DayPeriodControl extends StatelessWidget {
     return result;
   }
 }
-
-late bool Function(TimeOfDayWithSecond? time) _isSelectableTime;
-late dynamic Function() _notifyFailValidation;

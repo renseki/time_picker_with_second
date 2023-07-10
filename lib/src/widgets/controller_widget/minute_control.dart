@@ -10,6 +10,7 @@ class MinuteControl extends StatelessWidget {
   /// Creates a minute fragment.
   const MinuteControl({
     required this.fragmentContext,
+    super.key,
   });
 
   /// The context for the time picker header fragment.

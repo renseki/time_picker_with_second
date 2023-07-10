@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
 import 'package:time_picker_with_second/src/constants/time_picker_constants.dart';
+import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
 import 'package:time_picker_with_second/src/utils/num_extension.dart';
 import 'package:time_picker_with_second/src/widgets/controller_widget/day_period_control.dart';
 import 'package:time_picker_with_second/src/widgets/controller_widget/hour_control.dart';
@@ -90,6 +90,7 @@ class TimePickerHeader extends StatelessWidget {
       selectedTime: selectedTime,
       orientation: orientation,
       onChanged: onChanged,
+      selectableTimePredicate: selectableTimePredicate,
     );
 
     final hourControl = HourControl(fragmentContext: fragmentContext);

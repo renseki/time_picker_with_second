@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
 import 'package:time_picker_with_second/src/constants/time_picker_constants.dart';
+import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
 import 'package:time_picker_with_second/src/widgets/dial_painter.dart';
 import 'package:time_picker_with_second/src/widgets/tappable_label.dart';
 import 'package:time_picker_with_second/time_picker_with_second.dart';
@@ -46,6 +46,7 @@ class Dial extends StatefulWidget {
   DialState createState() => DialState();
 }
 
+/// The state of a [Dial].
 class DialState extends State<Dial> with SingleTickerProviderStateMixin {
   TimeOfDayWithSecond? _lastSelectableTime;
 
@@ -70,8 +71,13 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       );
   }
 
+  /// themeData
   late ThemeData themeData;
+
+  /// device locale
   late MaterialLocalizations localizations;
+
+  /// media
   late MediaQueryData media;
 
   @override
@@ -178,7 +184,12 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       // }
       newTime = widget.selectedTime.replacing(seconds: seconds);
     }
-    if (_isSelectableTime(newTime)) _lastSelectableTime = newTime;
+    if (TimePickerConstants.isSelectableTime(
+      time: newTime,
+      selectableTimePredicate: widget.selectableTimePredicate,
+    )) {
+      _lastSelectableTime = newTime;
+    }
     return newTime;
   }
 
@@ -224,7 +235,12 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     _updateThetaForPan();
 
     final newTime = _getTimeForTheta(_theta.value);
-    if (_isSelectableTime(newTime)) _notifyOnChangedIfNeeded();
+    if (TimePickerConstants.isSelectableTime(
+      time: newTime,
+      selectableTimePredicate: widget.selectableTimePredicate,
+    )) {
+      _notifyOnChangedIfNeeded();
+    }
   }
 
   void _handlePanEnd(DragEndDetails details) {
@@ -233,7 +249,10 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     _dragging = false;
     _position = null;
     _center = null;
-    if (!_isSelectableTime(newTime)) {
+    if (!TimePickerConstants.isSelectableTime(
+      time: newTime,
+      selectableTimePredicate: widget.selectableTimePredicate,
+    )) {
       _animateTo(_getThetaForTime(_lastSelectableTime));
     } else {
       _animateTo(_getThetaForTime(widget.selectedTime));
@@ -255,7 +274,10 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
 
     final newTime = _getTimeForTheta(_theta.value);
 
-    if (!_isSelectableTime(newTime)) {
+    if (!TimePickerConstants.isSelectableTime(
+      time: newTime,
+      selectableTimePredicate: widget.selectableTimePredicate,
+    )) {
       await Future<dynamic>.delayed(const Duration(milliseconds: 100));
       _animateTo(_getThetaForTime(_lastSelectableTime));
       return;
@@ -447,12 +469,13 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
         for (final TimeOfDayWithSecond timeOfDay in _amHours)
           _buildTappableLabel(
             textTheme: textTheme,
-            color: _isSelectableTime(
-              TimeOfDayWithSecond(
+            color: TimePickerConstants.isSelectableTime(
+              time: TimeOfDayWithSecond(
                 hour: _buildHourFrom12HourRing(timeOfDay.hour),
                 minute: timeOfDay.minute,
                 second: timeOfDay.second,
               ),
+              selectableTimePredicate: widget.selectableTimePredicate,
             )
                 ? color
                 : color.withOpacity(0.1),
@@ -495,8 +518,9 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       for (final TimeOfDayWithSecond timeOfDay in minuteMarkerValues)
         _buildTappableLabel(
           textTheme: textTheme,
-          color: _isSelectableTime(
-            timeOfDay.replacing(hour: widget.selectedTime.hour),
+          color: TimePickerConstants.isSelectableTime(
+            time: timeOfDay.replacing(hour: widget.selectedTime.hour),
+            selectableTimePredicate: widget.selectableTimePredicate,
           )
               ? color
               : color.withOpacity(0.1),
@@ -529,10 +553,11 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       for (final TimeOfDayWithSecond timeOfDay in secondsMarkerValues)
         _buildTappableLabel(
           textTheme: textTheme,
-          color: _isSelectableTime(
-            timeOfDay.replacing(
+          color: TimePickerConstants.isSelectableTime(
+            time: timeOfDay.replacing(
               hour: widget.selectedTime.hour,
             ),
+            selectableTimePredicate: widget.selectableTimePredicate,
           )
               ? color
               : color.withOpacity(0.1),
@@ -629,6 +654,3 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     );
   }
 }
-
-late bool Function(TimeOfDayWithSecond? time) _isSelectableTime;
-late dynamic Function() _notifyFailValidation;
