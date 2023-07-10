@@ -395,20 +395,33 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     _notifyOnChangedIfNeeded();
   }
 
-  static const List<TimeOfDayWithSecond> _amHours = <TimeOfDayWithSecond>[
-    TimeOfDayWithSecond(hour: 12, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 1, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 2, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 3, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 4, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 5, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 6, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 7, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 8, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 9, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 10, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 11, minute: 0, second: 0),
-  ];
+  // static const List<TimeOfDayWithSecond> _amHours = <TimeOfDayWithSecond>[
+  //   TimeOfDayWithSecond(hour: 12, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 1, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 2, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 3, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 4, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 5, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 6, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 7, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 8, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 9, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 10, minute: 0, second: 0),
+  //   TimeOfDayWithSecond(hour: 11, minute: 0, second: 0),
+  // ];
+
+  final _amHours = List.generate(
+    12,
+    (index) {
+      final isMiddlePoint = index == 0;
+      final value = isMiddlePoint ? 12 : index % 12;
+      return TimeOfDayWithSecond(
+        hour: value,
+        minute: 0,
+        second: 0,
+      );
+    },
+  );
 
   static const List<TimeOfDayWithSecond> _twentyFourHours =
       <TimeOfDayWithSecond>[
@@ -494,7 +507,6 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     if (hour == 12) {
       return (_isAM ? 0 : 12);
     }
-
     return hour + (_isAM ? 0 : 12);
   }
 
@@ -534,20 +546,10 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
   }
 
   List<TappableLabel> _buildSeconds(TextTheme textTheme, Color color) {
-    const secondsMarkerValues = <TimeOfDayWithSecond>[
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 5),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 10),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 15),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 20),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 25),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 30),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 35),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 40),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 45),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 50),
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 55),
-    ];
+    final secondsMarkerValues = List.generate(
+      12,
+      (index) => TimeOfDayWithSecond(hour: 0, minute: 0, second: index * 5),
+    );
 
     final result = <TappableLabel>[
       for (final TimeOfDayWithSecond timeOfDay in secondsMarkerValues)
