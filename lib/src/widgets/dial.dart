@@ -286,9 +286,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     } else {
       _animateTo(_getThetaForTime(widget.selectedTime));
       if (widget.unit == TimePickerUnit.hour) {
-        // if (widget.onHourSelected != null) {
         widget.onHourSelected();
-        // }
       } else if (widget.unit == TimePickerUnit.minute) {
         widget.onMinuteSelected();
       }
