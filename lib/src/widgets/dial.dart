@@ -474,22 +474,27 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     );
   }
 
-  List<TappableLabel> _build24HourRing(TextTheme textTheme, Color color) =>
-      <TappableLabel>[
-        for (final TimeOfDay timeOfDay in _twentyFourHours)
-          _buildTappableLabel(
-            textTheme: textTheme,
-            color: color,
-            value: timeOfDay.hour,
-            label: localizations.formatHour(
-              timeOfDay,
-              alwaysUse24HourFormat: media.alwaysUse24HourFormat,
-            ),
-            onTap: () {
-              _selectHour(timeOfDay.hour);
-            },
-          ),
-      ];
+  List<TappableLabel> _build24HourRing(
+    TextTheme textTheme,
+    Color color,
+  ) {
+    final result = _twentyFourHours.map<TappableLabel>((timeOfDay) {
+      return _buildTappableLabel(
+        textTheme: textTheme,
+        color: color,
+        value: timeOfDay.hour,
+        label: localizations.formatHour(
+          timeOfDay,
+          alwaysUse24HourFormat: media.alwaysUse24HourFormat,
+        ),
+        onTap: () {
+          _selectHour(timeOfDay.hour);
+        },
+      );
+    }).toList();
+
+    return result;
+  }
 
   List<TappableLabel> _build12HourRing(
     TextTheme textTheme,
