@@ -60,7 +60,13 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       duration: TimePickerConstants.kDialAnimateDuration,
       vsync: this,
     );
-    _thetaTween = Tween<double>(begin: _getThetaForTime(widget.selectedTime));
+
+    _thetaTween = Tween<double>(
+      begin: _getThetaForTime(
+        widget.selectedTime,
+      ),
+    );
+
     _theta = _thetaController!
         .drive(CurveTween(curve: Curves.easeIn))
         .drive(_thetaTween!)
@@ -92,8 +98,9 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
   @override
   void didUpdateWidget(Dial oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.mode != oldWidget.mode ||
-        widget.selectedTime != oldWidget.selectedTime) {
+    final isModeChanged = widget.mode != oldWidget.mode;
+    final isSelectedTimeChanged = widget.selectedTime != oldWidget.selectedTime;
+    if (isModeChanged || isSelectedTimeChanged) {
       if (!_dragging) _animateTo(_getThetaForTime(widget.selectedTime));
     }
   }
@@ -133,20 +140,45 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       ..forward();
   }
 
-  double _getThetaForTime(TimeOfDayWithSecond? time) {
+  double _getThetaForTime(
+    TimeOfDayWithSecond? time,
+  ) {
+    final fraction = _getFraction(currentTime: time!);
+    const rightAngle = math.pi / 2.0;
+
+    /// calculates the angular position based on the fraction of
+    /// the current time relative to the total time range.
+    final angularPosition = fraction * TimePickerConstants.kTwoPi;
+
+    /// Subtracting the calculated angular position from the right angle
+    /// determines the angle with respect to
+    /// the 12 o'clock position on the circle.
+    final theta = (rightAngle - angularPosition) % TimePickerConstants.kTwoPi;
+
+    return theta;
+  }
+
+  double _getFraction({
+    required TimeOfDayWithSecond currentTime,
+  }) {
     final hoursFactor = widget.use24HourDials
         ? TimeOfDay.hoursPerDay
         : TimeOfDay.hoursPerPeriod;
 
-    final fraction = widget.mode == TimePickerUnit.hour
-        ? (time!.hour / hoursFactor) % hoursFactor
-        : (widget.mode == TimePickerUnit.minute)
-            ? (time!.minute / TimeOfDay.minutesPerHour) %
-                TimeOfDay.minutesPerHour
-            : (time!.second / TimeOfDay.minutesPerHour) %
-                TimeOfDay.minutesPerHour;
-    return (math.pi / 2.0 - fraction * TimePickerConstants.kTwoPi) %
-        TimePickerConstants.kTwoPi;
+    final isSelectingHour = widget.mode == TimePickerUnit.hour;
+    final isSelectingMinute = widget.mode == TimePickerUnit.minute;
+
+    final hourFraction = (currentTime.hour / hoursFactor) % hoursFactor;
+
+    final minuteFraction = (currentTime.minute / TimeOfDay.minutesPerHour) %
+        TimeOfDay.minutesPerHour;
+
+    final secondsFraction = (currentTime.second / TimeOfDay.minutesPerHour) %
+        TimeOfDay.minutesPerHour;
+
+    if (isSelectingHour) return hourFraction;
+    if (isSelectingMinute) return minuteFraction;
+    return secondsFraction;
   }
 
   TimeOfDayWithSecond _getTimeForTheta(
@@ -395,21 +427,6 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     _notifyOnChangedIfNeeded();
   }
 
-  // static const List<TimeOfDayWithSecond> _amHours = <TimeOfDayWithSecond>[
-  //   TimeOfDayWithSecond(hour: 12, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 1, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 2, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 3, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 4, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 5, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 6, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 7, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 8, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 9, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 10, minute: 0, second: 0),
-  //   TimeOfDayWithSecond(hour: 11, minute: 0, second: 0),
-  // ];
-
   final _amHours = List.generate(
     12,
     (index) {
@@ -423,21 +440,18 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     },
   );
 
-  static const List<TimeOfDayWithSecond> _twentyFourHours =
-      <TimeOfDayWithSecond>[
-    TimeOfDayWithSecond(hour: 12, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 1, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 2, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 3, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 4, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 5, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 6, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 7, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 8, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 9, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 10, minute: 0, second: 0),
-    TimeOfDayWithSecond(hour: 11, minute: 0, second: 0),
-  ];
+  final _twentyFourHours = List.generate(
+    12,
+    (index) {
+      final isMiddlePoint = index == 0;
+      final value = isMiddlePoint ? 12 : index % 24;
+      return TimeOfDayWithSecond(
+        hour: value,
+        minute: 0,
+        second: 0,
+      );
+    },
+  );
 
   TappableLabel _buildTappableLabel({
     required TextTheme textTheme,
@@ -602,24 +616,24 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
 
     switch (widget.mode) {
       case TimePickerUnit.hour:
-        final secondary = _build24HourRing(
-          theme
-              .copyWith(
-                colorScheme: theme.colorScheme.copyWith(
-                  secondary: theme.colorScheme.onSecondary,
-                ),
-              )
-              .textTheme,
+        final secondary24 = _build24HourRing(
+          theme.textTheme,
           secondaryLabelColor,
         );
+
+        final secondary12 = _build12HourRing(
+          theme.textTheme,
+          secondaryLabelColor,
+        );
+
         if (widget.use24HourDials) {
           selectedDialValue = widget.selectedTime.hour;
           primaryLabels = _build24HourRing(theme.textTheme, primaryLabelColor);
-          secondaryLabels = secondary;
+          secondaryLabels = secondary24;
         } else {
           selectedDialValue = widget.selectedTime.hourOfPeriod;
           primaryLabels = _build12HourRing(theme.textTheme, primaryLabelColor);
-          secondaryLabels = secondary;
+          secondaryLabels = secondary12;
         }
         break;
       case TimePickerUnit.seconds:
