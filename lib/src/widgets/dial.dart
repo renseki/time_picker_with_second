@@ -491,24 +491,34 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
           ),
       ];
 
-  List<TappableLabel> _build12HourRing(TextTheme textTheme, Color color) =>
-      <TappableLabel>[
-        for (final TimeOfDayWithSecond timeOfDay in _amHours)
-          _buildTappableLabel(
-            textTheme: textTheme,
-            color: _get12HourRingColor(timeOfDay, color),
-            value: timeOfDay.hour,
-            label: localizations.formatHour(
-              timeOfDay,
-              alwaysUse24HourFormat: media.alwaysUse24HourFormat,
-            ),
-            onTap: () {
-              _selectHour(timeOfDay.hour);
-            },
-          ),
-      ];
+  List<TappableLabel> _build12HourRing(
+    TextTheme textTheme,
+    Color color,
+  ) {
+    final result = _amHours.map<TappableLabel>((timeOfDay) {
+      final hourColor = _get12HourRingColor(timeOfDay, color);
 
-  Color _get12HourRingColor(TimeOfDayWithSecond timeOfDay, Color color) {
+      return _buildTappableLabel(
+        textTheme: textTheme,
+        color: hourColor,
+        value: timeOfDay.hour,
+        label: localizations.formatHour(
+          timeOfDay,
+          alwaysUse24HourFormat: media.alwaysUse24HourFormat,
+        ),
+        onTap: () {
+          _selectHour(timeOfDay.hour);
+        },
+      );
+    }).toList();
+
+    return result;
+  }
+
+  Color _get12HourRingColor(
+    TimeOfDayWithSecond timeOfDay,
+    Color color,
+  ) {
     final time = TimeOfDayWithSecond(
       hour: _buildHourFrom12HourRing(timeOfDay.hour),
       minute: timeOfDay.minute,
@@ -539,7 +549,6 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       ),
     );
 
-
     final result = minuteMarkerValues.map<TappableLabel>((timeOfDay) {
       final isSelectableTime = TimePickerConstants.isSelectableTime(
         time: timeOfDay.replacing(hour: widget.selectedTime.hour),
@@ -558,7 +567,6 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       );
     }).toList();
 
-
     return result;
   }
 
@@ -575,28 +583,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       ),
     );
 
-    // final result = <TappableLabel>[
-    //   for (final TimeOfDayWithSecond timeOfDay in secondsMarkerValues)
-    //     _buildTappableLabel(
-    //       textTheme: textTheme,
-    //       color: TimePickerConstants.isSelectableTime(
-    //         time: timeOfDay.replacing(
-    //           hour: widget.selectedTime.hour,
-    //         ),
-    //         selectableTimePredicate: widget.selectableTimePredicate,
-    //       )
-    //           ? color
-    //           : color.withOpacity(0.1),
-    //       value: timeOfDay.second,
-    //       label: timeOfDay.formatSeconds,
-    //       onTap: () {
-    //         _selectSeconds(timeOfDay.second);
-    //       },
-    //     ),
-    // ];
-
     final result = secondsMarkerValues.map<TappableLabel>((timeOfDay) {
-
       final isSelectableTime = TimePickerConstants.isSelectableTime(
         time: timeOfDay.replacing(hour: widget.selectedTime.hour),
         selectableTimePredicate: widget.selectableTimePredicate,
@@ -614,7 +601,6 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
         },
       );
     }).toList();
-
 
     return result;
   }
