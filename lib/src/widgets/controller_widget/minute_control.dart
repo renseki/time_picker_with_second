@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
+import 'package:time_picker_with_second/src/enums/time_picker_unit_enum.dart';
 import 'package:time_picker_with_second/src/widgets/controller_widget/main_control.dart';
 import 'package:time_picker_with_second/src/widgets/timepicker_fragment.dart';
 
@@ -50,10 +50,10 @@ class MinuteControl extends StatelessWidget {
         fragmentContext.onTimeChange(previousMinute);
       },
       child: HourMinuteSecondsControl(
-        isSelected: fragmentContext.mode == TimePickerUnit.minute,
+        isSelected: fragmentContext.unit == TimePickerUnit.minute,
         text: formattedMinute,
         onTap: Feedback.wrapForTap(
-          () => fragmentContext.onModeChange(TimePickerUnit.minute),
+          () => fragmentContext.onChangeUnit(TimePickerUnit.minute),
           context,
         )!,
       ),

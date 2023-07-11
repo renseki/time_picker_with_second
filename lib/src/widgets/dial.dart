@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:time_picker_with_second/src/constants/time_picker_constants.dart';
-import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
+import 'package:time_picker_with_second/src/enums/time_picker_unit_enum.dart';
 import 'package:time_picker_with_second/src/widgets/dial_painter.dart';
 import 'package:time_picker_with_second/src/widgets/tappable_label.dart';
 import 'package:time_picker_with_second/time_picker_with_second.dart';
@@ -12,7 +12,7 @@ class Dial extends StatefulWidget {
   /// Creates a dial that can be turned to set a time.
   const Dial({
     required this.selectedTime,
-    required this.mode,
+    required this.unit,
     required this.use24HourDials,
     required this.onChanged,
     required this.onHourSelected,
@@ -25,7 +25,7 @@ class Dial extends StatefulWidget {
   final TimeOfDayWithSecond selectedTime;
 
   /// The mode of the time picker.
-  final TimePickerUnit mode;
+  final TimePickerUnit unit;
 
   /// Whether 24 hour dials should be used.
   final bool use24HourDials;
@@ -98,7 +98,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
   @override
   void didUpdateWidget(Dial oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final isModeChanged = widget.mode != oldWidget.mode;
+    final isModeChanged = widget.unit != oldWidget.unit;
     final isSelectedTimeChanged = widget.selectedTime != oldWidget.selectedTime;
     if (isModeChanged || isSelectedTimeChanged) {
       if (!_dragging) _animateTo(_getThetaForTime(widget.selectedTime));
@@ -165,8 +165,8 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
         ? TimeOfDay.hoursPerDay
         : TimeOfDay.hoursPerPeriod;
 
-    final isSelectingHour = widget.mode == TimePickerUnit.hour;
-    final isSelectingMinute = widget.mode == TimePickerUnit.minute;
+    final isSelectingHour = widget.unit == TimePickerUnit.hour;
+    final isSelectingMinute = widget.unit == TimePickerUnit.minute;
 
     final hourFraction = (currentTime.hour / hoursFactor) % hoursFactor;
 
@@ -189,7 +189,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
             (theta % TimePickerConstants.kTwoPi) / TimePickerConstants.kTwoPi) %
         1.0;
     TimeOfDayWithSecond newTime;
-    if (widget.mode == TimePickerUnit.hour) {
+    if (widget.unit == TimePickerUnit.hour) {
       int newHour;
       if (widget.use24HourDials) {
         newHour =
@@ -200,7 +200,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
         newHour = newHour + widget.selectedTime.periodOffset;
       }
       newTime = widget.selectedTime.replacing(hour: newHour);
-    } else if (widget.mode == TimePickerUnit.minute) {
+    } else if (widget.unit == TimePickerUnit.minute) {
       var minute = (fraction * TimeOfDay.minutesPerHour).round() %
           TimeOfDay.minutesPerHour;
       if (roundMinutes) {
@@ -288,11 +288,11 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       _animateTo(_getThetaForTime(_lastSelectableTime));
     } else {
       _animateTo(_getThetaForTime(widget.selectedTime));
-      if (widget.mode == TimePickerUnit.hour) {
+      if (widget.unit == TimePickerUnit.hour) {
         // if (widget.onHourSelected != null) {
         widget.onHourSelected();
         // }
-      } else if (widget.mode == TimePickerUnit.minute) {
+      } else if (widget.unit == TimePickerUnit.minute) {
         widget.onMinuteSelected();
       }
     }
@@ -315,7 +315,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       return;
     }
 
-    if (widget.mode == TimePickerUnit.hour) {
+    if (widget.unit == TimePickerUnit.hour) {
       if (widget.use24HourDials) {
         TimePickerConstants.announceToAccessibility(
           context,
@@ -330,14 +330,14 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       // if (widget.onHourSelected != null) {
       widget.onHourSelected();
       // }
-    } else if (widget.mode == TimePickerUnit.minute) {
+    } else if (widget.unit == TimePickerUnit.minute) {
       TimePickerConstants.announceToAccessibility(
         context,
         localizations.formatDecimal(newTime.minute),
       );
 
       widget.onMinuteSelected();
-    } else if (widget.mode == TimePickerUnit.seconds) {
+    } else if (widget.unit == TimePickerUnit.seconds) {
       TimePickerConstants.announceToAccessibility(
         context,
         localizations.formatDecimal(newTime.second),
@@ -365,7 +365,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     );
 
     TimeOfDayWithSecond time;
-    if (widget.mode == TimePickerUnit.hour && widget.use24HourDials) {
+    if (widget.unit == TimePickerUnit.hour && widget.use24HourDials) {
       time = TimeOfDayWithSecond(
         hour: hour,
         minute: widget.selectedTime.minute,
@@ -620,7 +620,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     List<TappableLabel>? secondaryLabels;
     int? selectedDialValue;
 
-    switch (widget.mode) {
+    switch (widget.unit) {
       case TimePickerUnit.hour:
         final secondary24 = _build24HourRing(
           theme.textTheme,

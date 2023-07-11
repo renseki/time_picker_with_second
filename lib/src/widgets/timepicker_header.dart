@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:time_picker_with_second/src/constants/time_picker_constants.dart';
-import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
+import 'package:time_picker_with_second/src/enums/time_picker_unit_enum.dart';
 import 'package:time_picker_with_second/src/utils/num_extension.dart';
 import 'package:time_picker_with_second/src/widgets/controller_widget/day_period_control.dart';
 import 'package:time_picker_with_second/src/widgets/controller_widget/hour_control.dart';
@@ -15,9 +15,9 @@ class TimePickerHeader extends StatelessWidget {
   /// named constructor
   const TimePickerHeader({
     required this.selectedTime,
-    required this.mode,
+    required this.unit,
     required this.orientation,
-    required this.onModeChanged,
+    required this.onUnitChanged,
     required this.onChanged,
     required this.use24HourDials,
     required this.helpText,
@@ -29,13 +29,13 @@ class TimePickerHeader extends StatelessWidget {
   final TimeOfDayWithSecond selectedTime;
 
   /// The current [TimePickerUnit] of the time picker.
-  final TimePickerUnit mode;
+  final TimePickerUnit unit;
 
   /// The orientation of the time picker.
   final Orientation orientation;
 
   /// Called when the current [TimePickerUnit] should be changed.
-  final ValueChanged<TimePickerUnit> onModeChanged;
+  final ValueChanged<TimePickerUnit> onUnitChanged;
 
   /// Called when the selected time should be changed.
   final ValueChanged<TimeOfDayWithSecond> onChanged;
@@ -49,8 +49,8 @@ class TimePickerHeader extends StatelessWidget {
   /// The predicate to use for determining which times are selectable.
   final SelectableTimePredicate? selectableTimePredicate;
 
-  void _handleChangeMode(TimePickerUnit value) {
-    if (value != mode) onModeChanged(value);
+  void _handleChangeUnit(TimePickerUnit value) {
+    if (value != unit) onUnitChanged(value);
   }
 
   @override
@@ -69,9 +69,9 @@ class TimePickerHeader extends StatelessWidget {
 
     final fragmentContext = TimePickerFragmentContext(
       selectedTime: selectedTime,
-      mode: mode,
+      unit: unit,
       onTimeChange: onChanged,
-      onModeChange: _handleChangeMode,
+      onChangeUnit: _handleChangeUnit,
       use24HourDials: use24HourDials,
     );
 

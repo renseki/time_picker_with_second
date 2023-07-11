@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:time_picker_with_second/src/constants/time_picker_constants.dart';
-import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
+import 'package:time_picker_with_second/src/enums/time_picker_unit_enum.dart';
 import 'package:time_picker_with_second/src/widgets/controller_widget/hours_format_control.dart';
 import 'package:time_picker_with_second/src/widgets/dial.dart';
 import 'package:time_picker_with_second/src/widgets/timepicker_header.dart';
@@ -90,8 +90,8 @@ class TimePickerWithSecondsDialogState
   }
 
   TimePickerEntryMode? _entryMode;
-  TimePickerUnit _mode = TimePickerUnit.hour;
-  TimePickerUnit? _lastModeAnnounced;
+  TimePickerUnit _selectedUnit = TimePickerUnit.hour;
+  TimePickerUnit? _lastUnitAnnounced;
 
 //   bool _autoValidate;
 
@@ -126,10 +126,10 @@ class TimePickerWithSecondsDialogState
     }
   }
 
-  void _handleModeChanged(TimePickerUnit mode) {
+  void _handleUnitChanged(TimePickerUnit unit) {
     _vibrate();
     setState(() {
-      _mode = mode;
+      _selectedUnit = unit;
       _announceModeOnce();
     });
   }
@@ -150,12 +150,12 @@ class TimePickerWithSecondsDialogState
 //   }
 
   void _announceModeOnce() {
-    if (_lastModeAnnounced == _mode) {
+    if (_lastUnitAnnounced == _selectedUnit) {
       // Already announced it.
       return;
     }
 
-    switch (_mode) {
+    switch (_selectedUnit) {
       case TimePickerUnit.hour:
         TimePickerConstants.announceToAccessibility(
           context,
@@ -175,7 +175,7 @@ class TimePickerWithSecondsDialogState
         );
         break;
     }
-    _lastModeAnnounced = _mode;
+    _lastUnitAnnounced = _selectedUnit;
   }
 
   bool _announcedInitialTime = false;
@@ -204,13 +204,13 @@ class TimePickerWithSecondsDialogState
 
   void _handleHourSelected() {
     setState(() {
-      _mode = TimePickerUnit.minute;
+      _selectedUnit = TimePickerUnit.minute;
     });
   }
 
   void _handleMinuteSelected() {
     setState(() {
-      _mode = TimePickerUnit.seconds;
+      _selectedUnit = TimePickerUnit.seconds;
     });
   }
 
@@ -343,12 +343,11 @@ class TimePickerWithSecondsDialogState
           padding: orientation == Orientation.portrait
               ? const EdgeInsets.symmetric(horizontal: 36, vertical: 24)
               : const EdgeInsets.all(24),
-
           child: ExcludeSemantics(
             child: AspectRatio(
               aspectRatio: 1,
               child: Dial(
-                mode: _mode,
+                unit: _selectedUnit,
                 use24HourDials: _is24HourFormat,
                 selectedTime: _selectedTime!,
                 onChanged: _handleTimeChanged,
@@ -362,9 +361,9 @@ class TimePickerWithSecondsDialogState
 
         final Widget header = TimePickerHeader(
           selectedTime: _selectedTime!,
-          mode: _mode,
+          unit: _selectedUnit,
           orientation: orientation,
-          onModeChanged: _handleModeChanged,
+          onUnitChanged: _handleUnitChanged,
           onChanged: _handleTimeChanged,
           use24HourDials: use24HourDials,
           helpText: widget.helpText,
@@ -420,21 +419,31 @@ class TimePickerWithSecondsDialogState
     }
 
     final dialogSize = _dialogSize(context);
-    return Dialog(
-      shape: shape,
-      backgroundColor: TimePickerTheme.of(context).backgroundColor ??
-          theme.colorScheme.surface,
-      insetPadding: EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: _entryMode == TimePickerEntryMode.input ? 0.0 : 24.0,
-      ),
-      child: AnimatedContainer(
-        width: dialogSize.width,
-        height: dialogSize.height,
-        duration: TimePickerConstants.kDialogSizeAnimationDuration,
-        curve: Curves.easeIn,
-        child: picker,
-      ),
+    return Builder(
+      builder: (context) {
+
+        final backgroundColor = TimePickerTheme.of(context).backgroundColor ??
+            theme.colorScheme.surface;
+
+        final verticalPadding =
+            _entryMode == TimePickerEntryMode.input ? 0.0 : 24.0;
+
+        return Dialog(
+          shape: shape,
+          backgroundColor: backgroundColor,
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: verticalPadding,
+          ),
+          child: AnimatedContainer(
+            width: dialogSize.width,
+            height: dialogSize.height,
+            duration: TimePickerConstants.kDialogSizeAnimationDuration,
+            curve: Curves.easeIn,
+            child: picker,
+          ),
+        );
+      },
     );
   }
 
