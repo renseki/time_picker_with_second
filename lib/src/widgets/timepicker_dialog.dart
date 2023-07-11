@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:time_picker_with_second/src/constants/time_picker_constants.dart';
 import 'package:time_picker_with_second/src/enums/time_picker_enum.dart';
+import 'package:time_picker_with_second/src/widgets/controller_widget/hours_format_control.dart';
 import 'package:time_picker_with_second/src/widgets/dial.dart';
 import 'package:time_picker_with_second/src/widgets/timepicker_header.dart';
 import 'package:time_picker_with_second/time_picker_with_second.dart';
@@ -101,6 +102,8 @@ class TimePickerWithSecondsDialogState
   SelectableTimePredicate? _selectableTimePredicate;
 
   Timer? _vibrateTimer;
+
+  bool _is24HourFormat = false;
 
   /// Device locale when the dialog was created.
   late MaterialLocalizations localizations;
@@ -288,45 +291,42 @@ class TimePickerWithSecondsDialogState
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context), 'No MediaQuery widget found.');
+
     final media = MediaQuery.of(context);
-//     final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(
-//         alwaysUse24HourFormat: false //media.alwaysUse24HourFormat
-//         );
-    const use24HourDials = true;
-    // hourFormat(of: timeOfDayFormat) != HourFormat.h;
+    final use24HourDials = _is24HourFormat;
     final theme = Theme.of(context);
     final shape =
         TimePickerTheme.of(context).shape ?? TimePickerConstants.kDefaultShape;
+
     final orientation = media.orientation;
 
     final Widget actions = Row(
       children: <Widget>[
         const SizedBox(width: 10),
-        // IconButton(
-        //   color: TimePickerTheme.of(context).entryModeIconColor ??
-        //       theme.colorScheme.onSurface.withOpacity(
-        //         theme.colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
-        //       ),
-        //   onPressed: _handleEntryModeToggle,
-        //   icon: Icon(_entryMode == TimePickerEntryMode.dial
-        //       ? Icons.keyboard
-        //       : Icons.access_time),
-        //   tooltip: _entryMode == TimePickerEntryMode.dial
-        //       ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
-        //       : MaterialLocalizations.of(context).dialModeButtonLabel,
-        // ),
+        HourFormatControl(
+          is24HourFormat: _is24HourFormat,
+          onToggle: () {
+            setState(() {
+              _is24HourFormat = !_is24HourFormat;
+            });
+          },
+        ),
+        const Spacer(),
         Expanded(
           child: ButtonBar(
             layoutBehavior: ButtonBarLayoutBehavior.constrained,
             children: <Widget>[
               TextButton(
                 onPressed: _handleCancel,
-                child:
-                    Text(widget.cancelText ?? localizations.cancelButtonLabel),
+                child: Text(
+                  widget.cancelText ?? localizations.cancelButtonLabel,
+                ),
               ),
               TextButton(
                 onPressed: _handleOk,
-                child: Text(widget.confirmText ?? localizations.okButtonLabel),
+                child: Text(
+                  widget.confirmText ?? localizations.okButtonLabel,
+                ),
               ),
             ],
           ),
@@ -343,12 +343,13 @@ class TimePickerWithSecondsDialogState
           padding: orientation == Orientation.portrait
               ? const EdgeInsets.symmetric(horizontal: 36, vertical: 24)
               : const EdgeInsets.all(24),
+
           child: ExcludeSemantics(
             child: AspectRatio(
               aspectRatio: 1,
               child: Dial(
                 mode: _mode,
-                use24HourDials: use24HourDials,
+                use24HourDials: _is24HourFormat,
                 selectedTime: _selectedTime!,
                 onChanged: _handleTimeChanged,
                 onHourSelected: _handleHourSelected,
@@ -408,23 +409,7 @@ class TimePickerWithSecondsDialogState
         }
         break;
       case TimePickerEntryMode.input:
-//         picker = Form(
-//           key: _formKey,
-// //           autovalidate: _autoValidate,
-//           child: SingleChildScrollView(
-//             child: Column(
-//               mainAxisSize: MainAxisSize.min,
-//               children: <Widget>[
-//                 _TimePickerInput(
-//                   initialSelectedTime: _selectedTime!,
-//                   helpText: widget.helpText,
-//                   onChanged: _handleTimeChanged,
-//                 ),
-//                 actions,
-//               ],
-//             ),
-//           ),
-//         );
+        // TODO(Zagustan): Handle onInput mode
         break;
       case TimePickerEntryMode.dialOnly:
         // TODO(Zagustan): Handle this case.
