@@ -539,23 +539,27 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       ),
     );
 
-    return <TappableLabel>[
-      for (final TimeOfDayWithSecond timeOfDay in minuteMarkerValues)
-        _buildTappableLabel(
-          textTheme: textTheme,
-          color: TimePickerConstants.isSelectableTime(
-            time: timeOfDay.replacing(hour: widget.selectedTime.hour),
-            selectableTimePredicate: widget.selectableTimePredicate,
-          )
-              ? color
-              : color.withOpacity(0.1),
-          value: timeOfDay.minute,
-          label: localizations.formatMinute(timeOfDay),
-          onTap: () {
-            _selectMinute(timeOfDay.minute);
-          },
-        ),
-    ];
+
+    final result = minuteMarkerValues.map<TappableLabel>((timeOfDay) {
+      final isSelectableTime = TimePickerConstants.isSelectableTime(
+        time: timeOfDay.replacing(hour: widget.selectedTime.hour),
+        selectableTimePredicate: widget.selectableTimePredicate,
+      );
+      final minutesColor = isSelectableTime ? color : color.withOpacity(0.1);
+
+      return _buildTappableLabel(
+        textTheme: textTheme,
+        color: minutesColor,
+        value: timeOfDay.minute,
+        label: localizations.formatMinute(timeOfDay),
+        onTap: () {
+          _selectMinute(timeOfDay.minute);
+        },
+      );
+    }).toList();
+
+
+    return result;
   }
 
   List<TappableLabel> _buildSeconds(
@@ -571,25 +575,46 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       ),
     );
 
-    final result = <TappableLabel>[
-      for (final TimeOfDayWithSecond timeOfDay in secondsMarkerValues)
-        _buildTappableLabel(
-          textTheme: textTheme,
-          color: TimePickerConstants.isSelectableTime(
-            time: timeOfDay.replacing(
-              hour: widget.selectedTime.hour,
-            ),
-            selectableTimePredicate: widget.selectableTimePredicate,
-          )
-              ? color
-              : color.withOpacity(0.1),
-          value: timeOfDay.second,
-          label: timeOfDay.formatSeconds,
-          onTap: () {
-            _selectSeconds(timeOfDay.second);
-          },
-        ),
-    ];
+    // final result = <TappableLabel>[
+    //   for (final TimeOfDayWithSecond timeOfDay in secondsMarkerValues)
+    //     _buildTappableLabel(
+    //       textTheme: textTheme,
+    //       color: TimePickerConstants.isSelectableTime(
+    //         time: timeOfDay.replacing(
+    //           hour: widget.selectedTime.hour,
+    //         ),
+    //         selectableTimePredicate: widget.selectableTimePredicate,
+    //       )
+    //           ? color
+    //           : color.withOpacity(0.1),
+    //       value: timeOfDay.second,
+    //       label: timeOfDay.formatSeconds,
+    //       onTap: () {
+    //         _selectSeconds(timeOfDay.second);
+    //       },
+    //     ),
+    // ];
+
+    final result = secondsMarkerValues.map<TappableLabel>((timeOfDay) {
+
+      final isSelectableTime = TimePickerConstants.isSelectableTime(
+        time: timeOfDay.replacing(hour: widget.selectedTime.hour),
+        selectableTimePredicate: widget.selectableTimePredicate,
+      );
+
+      final secondsColor = isSelectableTime ? color : color.withOpacity(0.1);
+
+      return _buildTappableLabel(
+        textTheme: textTheme,
+        color: secondsColor,
+        value: timeOfDay.second,
+        label: timeOfDay.formatSeconds,
+        onTap: () {
+          _selectSeconds(timeOfDay.second);
+        },
+      );
+    }).toList();
+
 
     return result;
   }
