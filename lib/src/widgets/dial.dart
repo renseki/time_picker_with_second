@@ -190,6 +190,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     final fraction = (0.25 -
             (theta % TimePickerConstants.kTwoPi) / TimePickerConstants.kTwoPi) %
         1.0;
+
     TimeOfDayWithSecond newTime;
     if (widget.unit == TimePickerUnit.hour) {
       int newHour;
@@ -212,10 +213,6 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
       newTime = widget.selectedTime.replacing(minute: minute);
     } else {
       final seconds = (fraction * 60).round() % 60;
-      // if (roundMinutes) {
-      // Round the minutes to nearest 5 minute interval.
-      // seconds = ((seconds + 2) ~/ 5) * 5 % 60;
-      // }
       newTime = widget.selectedTime.replacing(seconds: seconds);
     }
     if (TimePickerConstants.isSelectableTime(
@@ -229,9 +226,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
 
   TimeOfDayWithSecond _notifyOnChangedIfNeeded({bool roundMinutes = false}) {
     final current = _getTimeForTheta(_theta.value, roundMinutes: roundMinutes);
-    // if (current != widget.selectedTime){
     widget.onChanged(current);
-    // }
     return current;
   }
 
@@ -462,8 +457,12 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     VoidCallback? onTap,
   }) {
     final style = textTheme.bodyLarge!.copyWith(color: color);
-    final double labelScaleFactor =
-        math.min(MediaQuery.of(context).textScaleFactor, 2);
+
+    final double labelScaleFactor = math.min(
+      MediaQuery.of(context).textScaleFactor,
+      2,
+    );
+
     return TappableLabel(
       value: value,
       painter: TextPainter(
@@ -497,16 +496,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
         for (final TimeOfDayWithSecond timeOfDay in _amHours)
           _buildTappableLabel(
             textTheme: textTheme,
-            color: TimePickerConstants.isSelectableTime(
-              time: TimeOfDayWithSecond(
-                hour: _buildHourFrom12HourRing(timeOfDay.hour),
-                minute: timeOfDay.minute,
-                second: timeOfDay.second,
-              ),
-              selectableTimePredicate: widget.selectableTimePredicate,
-            )
-                ? color
-                : color.withOpacity(0.1),
+            color: _get12HourRingColor(timeOfDay, color),
             value: timeOfDay.hour,
             label: localizations.formatHour(
               timeOfDay,
@@ -518,28 +508,36 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
           ),
       ];
 
+  Color _get12HourRingColor(TimeOfDayWithSecond timeOfDay, Color color) {
+    final time = TimeOfDayWithSecond(
+      hour: _buildHourFrom12HourRing(timeOfDay.hour),
+      minute: timeOfDay.minute,
+      second: timeOfDay.second,
+    );
+
+    final timeIsSelectable = TimePickerConstants.isSelectableTime(
+      time: time,
+      selectableTimePredicate: widget.selectableTimePredicate,
+    );
+
+    return timeIsSelectable ? color : color.withOpacity(0.1);
+  }
+
   int _buildHourFrom12HourRing(int hour) {
-    if (hour == 12) {
-      return (_isAM ? 0 : 12);
-    }
+    if (hour == 12) return (_isAM ? 0 : 12);
+
     return hour + (_isAM ? 0 : 12);
   }
 
   List<TappableLabel> _buildMinutes(TextTheme textTheme, Color color) {
-    const minuteMarkerValues = <TimeOfDayWithSecond>[
-      TimeOfDayWithSecond(hour: 0, minute: 0, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 5, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 10, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 15, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 20, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 25, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 30, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 35, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 40, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 45, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 50, second: 0),
-      TimeOfDayWithSecond(hour: 0, minute: 55, second: 0),
-    ];
+    final minuteMarkerValues = List.generate(
+      12,
+      (index) => TimeOfDayWithSecond(
+        hour: 0,
+        minute: index * 5,
+        second: 0,
+      ),
+    );
 
     return <TappableLabel>[
       for (final TimeOfDayWithSecond timeOfDay in minuteMarkerValues)
