@@ -59,12 +59,10 @@ class TimePickerHeader extends StatelessWidget {
 
     final themeData = Theme.of(context);
 
-    final mediaQuery = MediaQuery.of(context);
     final localizations = MaterialLocalizations.of(context);
-    final mediaQuery24HourFormat = mediaQuery.alwaysUse24HourFormat;
 
     final timeOfDayFormat = localizations.timeOfDayFormat(
-      alwaysUse24HourFormat: mediaQuery24HourFormat,
+      alwaysUse24HourFormat: use24HourDials,
     );
 
     final fragmentContext = TimePickerFragmentContext(
@@ -176,8 +174,10 @@ class TimePickerHeader extends StatelessWidget {
       padding: padding,
       child: Builder(
         builder: (context) {
-          final helpTextContent = helpText ??
+          final materialHelpText =
               MaterialLocalizations.of(context).timePickerDialHelpText;
+
+          final helpTextContent = helpText ?? materialHelpText;
 
           final helpTextStyle = TimePickerTheme.of(context).helpTextStyle ??
               themeData.textTheme.labelSmall;

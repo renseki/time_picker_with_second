@@ -33,10 +33,10 @@ class Dial extends StatefulWidget {
   /// Called when the selected time changes.
   final ValueChanged<TimeOfDayWithSecond> onChanged;
 
-  /// Called when the hour changes.
+  /// Called when the hour is selected.
   final VoidCallback onHourSelected;
 
-  /// Called when the minute changes.
+  /// Called when the minute is selected.
   final VoidCallback onMinuteSelected;
 
   /// Optional predicate for determining which times are selectable.
@@ -100,7 +100,9 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
     final isModeChanged = widget.unit != oldWidget.unit;
     final isSelectedTimeChanged = widget.selectedTime != oldWidget.selectedTime;
-    if (isModeChanged || isSelectedTimeChanged) {
+    final isHourFormatChanged =
+        widget.use24HourDials != oldWidget.use24HourDials;
+    if (isModeChanged || isSelectedTimeChanged || isHourFormatChanged) {
       if (!_dragging) _animateTo(_getThetaForTime(widget.selectedTime));
     }
   }
