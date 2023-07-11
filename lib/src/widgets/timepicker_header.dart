@@ -81,6 +81,7 @@ class TimePickerHeader extends StatelessWidget {
 
     final formatIsNotAmPm =
         timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm;
+
     final formatIsAmPm = timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm;
 
     final not24HourDialNonMeridian = !use24HourDials && formatIsNotAmPm;

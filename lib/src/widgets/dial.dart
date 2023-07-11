@@ -443,8 +443,7 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
   final _twentyFourHours = List.generate(
     12,
     (index) {
-      final isMiddlePoint = index == 0;
-      final value = isMiddlePoint ? 12 : index % 24;
+      final value = index * 2;
       return TimeOfDayWithSecond(
         hour: value,
         minute: 0,
@@ -559,10 +558,17 @@ class DialState extends State<Dial> with SingleTickerProviderStateMixin {
     ];
   }
 
-  List<TappableLabel> _buildSeconds(TextTheme textTheme, Color color) {
+  List<TappableLabel> _buildSeconds(
+    TextTheme textTheme,
+    Color color,
+  ) {
     final secondsMarkerValues = List.generate(
       12,
-      (index) => TimeOfDayWithSecond(hour: 0, minute: 0, second: index * 5),
+      (index) => TimeOfDayWithSecond(
+        hour: 0,
+        minute: 0,
+        second: index * 5,
+      ),
     );
 
     final result = <TappableLabel>[

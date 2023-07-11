@@ -292,8 +292,8 @@ class TimePickerWithSecondsDialogState
 //     final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(
 //         alwaysUse24HourFormat: false //media.alwaysUse24HourFormat
 //         );
-    const use24HourDials =
-        false; // hourFormat(of: timeOfDayFormat) != HourFormat.h;
+    const use24HourDials = true;
+    // hourFormat(of: timeOfDayFormat) != HourFormat.h;
     final theme = Theme.of(context);
     final shape =
         TimePickerTheme.of(context).shape ?? TimePickerConstants.kDefaultShape;
